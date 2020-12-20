@@ -34,18 +34,40 @@ const searchPage = async (url) => {
   await page.goto(url);
   const html = await page.content();
   const $ = cheerio.load(html);
-  console.log($(".subtitle").length);
-  $(".subtitle").each((index, el) => {
-    const text = $(el).text().split("").reverse().join("").split(",");
-    if (text[1]) {
-      apartments.push({ cityName: text[1] });
-    }
-  });
-  //   $(".middle_col").each((index, el) => {
-  //     console.log(el);
-  //   });
-  console.log(apartments);
+  // await page.evaluate(() => {
+  //   document.querySelector("#feed_item_0").click();
+  // });
 
-  return apartments;
+  // await page.evaluate(() => {
+  //   const elements = document.querySelectorAll(".feed_item");
+  //   elements.forEach((el) => {
+  //     console.log(el.click());
+  //   });
+  // });
+
+  const result = $(".feeditem")
+    .map(async (i, el) => {
+      const city = $(el)
+        .find(".subtitle")
+        .map((i, el) => {
+          const text = $(el).text().split("").reverse().join("").split(",");
+          if (text[1]) {
+            return text[1];
+          } else {
+            return "no city";
+          }
+        })
+        .get();
+      const price = $(el).find(`#feed_item_${i}_price`).text().trim();
+      const rooms = $(el).find(`#data_rooms_${i}`).text();
+      const meters = $(el).find(`#data_SquareMeter_${i}`).text();
+      const link = `#feed_item_${i}`;
+      console.log(city[0]);
+      return { city: city[0], price, rooms, meters, link };
+    })
+    .get();
+
+  return result;
 };
 module.exports = searchPage;
+//todo when there is a private cottage then take the node upper
