@@ -1,5 +1,4 @@
 const puppeteer = require("puppeteer-extra");
-const request = require("request-promise");
 const cheerio = require("cheerio");
 var randomUserAgent = require("user-agents");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
@@ -10,7 +9,6 @@ const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36";
 
 const searchPage = async (url) => {
-  const apartments = [];
   const userAgent = randomUserAgent.random();
   const UA = userAgent || USER_AGENT;
 
@@ -30,10 +28,14 @@ const searchPage = async (url) => {
   });
 
   await page.setUserAgent(UA.toString());
-
+  //to do loop through pages if you think in the end its worth it.
+  // const number = parseInt($(".numbers").children().last().text().trim()) || 0;
+  // const num = 2;
   await page.goto(url);
   const html = await page.content();
   const $ = cheerio.load(html);
+
+  //open pages to get the details
   // await page.evaluate(() => {
   //   document.querySelector("#feed_item_0").click();
   // });
@@ -41,33 +43,32 @@ const searchPage = async (url) => {
   // await page.evaluate(() => {
   //   const elements = document.querySelectorAll(".feed_item");
   //   elements.forEach((el) => {
-  //     console.log(el.click());
+  //
   //   });
   // });
-
+  const transformText = (str) => {
+    return str.split("").reverse().join("").split(",");
+  };
   const result = $(".feeditem")
     .map(async (i, el) => {
-      const city = $(el)
-        .find(".subtitle")
-        .map((i, el) => {
-          const text = $(el).text().split("").reverse().join("").split(",");
-          if (text[1]) {
-            return text[1];
-          } else {
-            return "no city";
-          }
-        })
-        .get();
+      const city = () => {
+        const cityName = $(el).find(".subtitle").text().split(",");
+        if (cityName[1]) {
+          return cityName[1];
+        } else {
+          const cityName2 = $(el).find(`#feed_item_${i}_title`).text();
+          return cityName2.trim();
+        }
+      };
       const price = $(el).find(`#feed_item_${i}_price`).text().trim();
       const rooms = $(el).find(`#data_rooms_${i}`).text();
       const meters = $(el).find(`#data_SquareMeter_${i}`).text();
       const link = `#feed_item_${i}`;
-      console.log(city[0]);
-      return { city: city[0], price, rooms, meters, link };
+
+      return { city: city(), price, rooms, meters, link };
     })
     .get();
 
   return result;
 };
 module.exports = searchPage;
-//todo when there is a private cottage then take the node upper
