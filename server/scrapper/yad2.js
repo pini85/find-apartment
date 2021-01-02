@@ -1,14 +1,15 @@
 const puppeteer = require("puppeteer-extra");
-const cheerio = require("cheerio");
-var randomUserAgent = require("user-agents");
+const randomUserAgent = require("user-agents");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
+const cheerio = require("cheerio");
+
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36";
 
-const searchPage = async (url) => {
+const searchPage = async (url, callback) => {
   const userAgent = randomUserAgent.random();
   const UA = userAgent || USER_AGENT;
 
@@ -46,11 +47,9 @@ const searchPage = async (url) => {
   //
   //   });
   // });
-  const transformText = (str) => {
-    return str.split("").reverse().join("").split(",");
-  };
+
   const result = $(".feeditem")
-    .map(async (i, el) => {
+    .map((i, el) => {
       const city = () => {
         const cityName = $(el).find(".subtitle").text().split(",");
         if (cityName[1]) {
@@ -60,15 +59,22 @@ const searchPage = async (url) => {
           return cityName2.trim();
         }
       };
+
       const price = $(el).find(`#feed_item_${i}_price`).text().trim();
       const rooms = $(el).find(`#data_rooms_${i}`).text();
       const meters = $(el).find(`#data_SquareMeter_${i}`).text();
       const link = `#feed_item_${i}`;
 
-      return { city: city(), price, rooms, meters, link };
+      return {
+        city: city(),
+        price,
+        rooms,
+        meters,
+        link,
+      };
     })
     .get();
-
-  return result;
+  return callback(result);
 };
+
 module.exports = searchPage;

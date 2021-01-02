@@ -10,14 +10,23 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/translate": "^6.0.5",
+    "@k3rn31p4nic/google-translate-api": "^1.1.1",
+    "@mapbox/mapbox-gl-language": "^0.10.1",
+    "@mapbox/mapbox-gl-rtl-text": "^0.2.3",
     "axios": "^0.21.0",
     "cheerio": "^1.0.0-rc.3",
+    "express": "^4.17.1",
+    "google-translate-api": "^2.3.0",
+    "mapbox-gl": "^2.0.1",
+    "nodemon": "^2.0.6",
     "puppeteer": "^5.5.0",
     "puppeteer-extra": "^3.1.15",
     "puppeteer-extra-plugin-adblocker": "^2.11.9",
     "puppeteer-extra-plugin-stealth": "^2.6.5",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
+    "unirest": "^0.6.0",
     "user-agents": "^1.0.559"
   }
 }
